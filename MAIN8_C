@@ -1,0 +1,59 @@
+/*******************SPOJ PROBLEM 8756. Shake Shake Shaky**********/
+
+#include <iostream>
+using namespace std;
+
+long long int A[100000];
+
+int func(long long int mid, int n)
+{
+    int count=0;
+    for(int i=0;i<n;i++)
+      {
+         count+=(int)(A[i]/mid);
+      }
+    return count;
+}     
+
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    
+    for(int i=0;i<test;i++)
+      {
+         int n,f;
+         scanf("%d %d",&n,&f);
+         
+         long long int max=0;
+         long long int low=0;
+         long long int mid=0;
+         for(int j=0;j<n;j++)
+           {
+             scanf("%lld",&A[j]);
+             if(max<A[j])
+               max=A[j];
+           }
+         if(f==1)
+           {
+              printf("%lld\n",max);
+              continue;
+           }
+         for(int k=0;k<100;k++)
+           {
+              mid=(low+max)/2;
+            //  cout<<mid<<endl;
+              if(mid==0)
+                break;
+              if(func(mid,n)>=f)
+                low=mid;
+              else
+                max=mid;
+                
+           }
+        printf("%lld\n",low);
+     }
+return 0;
+}          
+                  
+                          
