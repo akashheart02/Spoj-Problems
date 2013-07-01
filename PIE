@@ -1,0 +1,54 @@
+/****************SPOJ PROBLEM: 1837 PIE*****************/
+
+#include <iostream>
+using namespace std;
+
+#define PI 3.14159265358979323846264338327950 
+
+double A[10001];
+
+int calc(double mid, int n)
+{
+    int cnt=0;
+    for(int i=0;i<n;i++)
+      {
+          cnt+=(int)(A[i]/mid);
+      }
+    return cnt;
+}
+           
+    
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    
+    for(int i=0;i<test;i++)
+      {
+         int n,f;
+         double high=0,low=0; 
+         scanf("%d %d",&n,&f);
+         
+         for(int k=0;k<n;k++)
+           {
+              scanf("%lf",&A[k]);
+              A[k]=A[k]*A[k]*PI;
+              if(A[k]>high)
+                high=A[k];     
+           }
+        for(int k=0;k<100;k++)
+          {
+             double mid = (low+high)/2;      
+             if(calc(mid,n) >= f+1)
+               {
+                  low=mid;
+               }
+             else
+               {
+                  high=mid;
+               }
+          }
+        printf("%.4lf\n",low);
+     }
+return 0;
+}                                 
