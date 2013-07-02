@@ -1,0 +1,55 @@
+/************15285. Defend The Rohan (ROHAAN) SPOJ PROBLEM*********/
+
+#include <iostream>
+using namespace std;
+
+int A[100][100];
+
+int min(int a,int b)
+{
+    if(a<b)
+      return a;
+    else
+      return b;
+}
+ 
+void floyd(int n)
+{
+     for(int i=1;i<=n;i++)
+       for(int j=1;j<=n;j++)
+         for(int k=1;k<=n;k++)
+           {
+               A[j][k]=min(A[j][k],A[j][i]+A[i][k]);
+           }
+}   
+ 
+int main()
+{
+    int test;
+    scanf("%d",&test);
+    
+    for(int i=0;i<test;i++)
+      {
+         int n;
+         scanf("%d",&n);
+         
+         for(int j=1;j<=n;j++)
+           for(int k=1;k<=n;k++)
+             scanf("%d",&A[j][k]);
+             
+         floyd(n);
+         
+         int r;
+         scanf("%d",&r);
+         int count=0;
+         for(int j=0;j<r;j++)
+           {
+              int p,q;
+              scanf("%d %d",&p,&q);
+              count+=A[p][q];
+           }
+         printf("Case #%d: %d\n",i+1,count);
+      }
+return 0;
+}               
+            
