@@ -1,0 +1,70 @@
+/***********SPOJ PROBLEM 66. Cross-country (CRSCNTRY)*******/
+
+#include <iostream>
+using namespace std;
+int A[2001];
+int B[2001];
+int L[2001][2001];
+int max(int a,int b)
+{
+    if(a>b)
+      return a;
+    else
+      return b;
+}
+int lcs(int m,int n)
+{
+   
+   for(int i=0;i<=m;i++)
+     for(int j=0;j<=n;j++)
+       {
+             if(i==0||j==0)
+               L[i][j]=0;
+             
+             else if(A[i-1]==B[j-1])
+                L[i][j]=L[i-1][j-1]+1;
+             else
+               L[i][j]=max(L[i-1][j],L[i][j-1]);
+       }
+    return L[m][n];
+}         
+int main()
+{
+   int test;
+   scanf("%d",&test);
+   
+   for(int i=0;i<test;i++)
+     {
+        int no;
+        int t=0;
+        scanf("%d",&no);
+        int max1=0;
+        while(no>0)
+          {
+             A[t]=no;
+             t++;
+             scanf("%d",&no);
+          }
+        scanf("%d",&no);  
+        while(no>0)
+          {
+              int k=0;     
+              while(no>0)
+                {
+                   B[k]=no;
+                   k++;
+                   scanf("%d",&no); 
+                }
+              int l=lcs(t,k);
+              
+              if(max1<l)
+                max1=l;
+                
+              scanf("%d",&no);  
+          }
+        printf("%d\n",max1);
+     }
+return 0;
+}                     
+                
+            
