@@ -1,0 +1,117 @@
+SPOJ - 3407. Candy (SAMER08C)
+The problem analyzed today was used in the South American regionals in 2008, where I was the server administrator and saw all the action from inside. As far as I remember, only one Venezuelan team was able to solve this problem during the contest, but in SPOJ it has been solved by more than 150 persons.
+Problem Statement
+
+This problem was used in the South American regionals, but Diego Satoba uploaded it to SPOJ here. However, it is unknown to me if the dataset is the same used during the official contest.
+Problem Analysis
+
+First, the problem asks for the maximum number of candies taken from the table, with the condition that when candies from a box are taken, all boxes from adjacent rows and the two boxes at the sides are cleared. Initially the problem seems complex because it looks like the order in which the boxes are taken matters; this implies that besides choosing which boxes to take, the solution should also see in which order they should be taken.
+
+The first two properties to notice about the table are:
+
+If taking a box B1 clears another box B2, then taking box B2 clears B1.
+If taking a box B1 does not clears another box B2, then taking B2 does not clear B1.
+
+This pair of properties (and the fact that the addition operator is conmutative) show that the order in which the candies are taken does not matter. This simplifies the solution because we can assume that the candies are taken in some specific order.
+
+Another complex aspect in the problem is that the table does not remain the same while taking the candies, because some boxes are cleared when candies are taken from other boxes. To simplify this it is enough to look "box clearing" as "box banning", i.e.: taking candies from one box prevents us from taking the candies in other boxes. This way, the table does not need to be modified during the algorithm's execution.
+Solving a simpler problem
+
+Now that the problem has been simplified, it is time to see how to get the optimum number of candies from the table. First, let's solve a simpler problem to gain some insight: Given an array of candies, return the maximum number of them that can be taken, if taking candies from one box clears both adjacent boxes. This is the equivalent of solving one row in the initial problem.
+
+To get the maximum number of candies for one row, we can use the fact that the order does not really matters and assume that candies are taken from left to right. Now that an order has been established, the solution can be formulated using Dynamic Programming (DP). Let n be the number of cells in the array, let F_i be the maximum number of candies that can be taken if boxes i to n-1 are available, and let C_i the number of candies in the box i. The function F_i can be solved recursively in the following way:
+
+F_i = \left\{
+\begin{array}{ll}
+  0 & \textrm{if $i \ge n$}\\
+  \max(C_i + F_{i+2}, F_{i+1}) & \textrm{if $i < n$}
+\end{array}\right
+
+The recursive definition of F_i works in the following way:
+
+The first case (i ≥ n) is the base case, which occurs when we want the maximum over an empty row. As there are no candies to take, the return value should be 0.
+
+The second case (i < n) is the only recursive case, which occurs when there are candies left to take. At this point we have two choices: Take the candies and skip the next box, or do not take the candies and proceed with the next box. Between those choices, we want the one that gives us more candies.
+
+Implementing this function using a recursive function takes O(2^n) execution time, but the execution time can be reduced to O(n) by using DP (see Solution Coding section for implementation details).
+Extending for the original problem
+
+Once the problem has been solved for single rows, it is time to extend the solution to work over grids. By observing carefully the behaviour of rows in the problem, it can be seen that taking one candy from one row will clear both adjacenct rows completely, and after that there is no way to clear that row. Using this, a solution can be proposed by extending F_i to work over bidimensional grids, adding a flag to indicate if at least one candy was taken from the current row.
+
+Unfortunatelly, this solution is complex to code, because storing the matrix in a bidimensional array might exceed the memory limit (10^10 integers require about 9.3GB of RAM). To store the whole matrix at the same time, it should be stored in a one-dimensional array and its access should be done manually, instead of being handled by the compiler.
+
+To overcome this difficulty, it is important to note that once a candy from a row is taken, the optimal solution implies to take as much candies from that row as possible. This property allows the creation of a simpler solution: first, calculate the maximum number of candies that can be taken from each row, and then (using the same algorithm) compute the optimal set of rows to take.
+
+
+
+By using this reduction, the solution's code should be short and simple.
+Solution Coding
+
+As it was mentioned in the previous section, the solution for optimizing rows will be used to optimize the whole grid, so the first logical step is to implement the proposed DP. In this problem, we will use a bottom-up DP, because the top-down version might overflow the stack. First, declare one array to hold the calculated values, and add two1 aditional positions for the border cases.
+view sourceprint?
+1.
+const int MAX_N = 100000;
+2.
+int dp[MAX_N + 2];
+
+After declaring the dp array, implement the function to optimize over a row. This function should receive a pointer to an array with the row values and an integer with the row size, and operate in the following way:
+
+Initialize the two bases cases with the return value 0.
+
+Process the states starting from the smaller ones to the greater ones, i.e.: starting from n-1 going to zero.
+
+For each state, calculate the value of f(i) using its recursive case. The values of f(i+1) and f(i+2) can be taken from the dp array, because higher indices have been calculated.
+
+After processing all cases, return the result of optimizing over the whole row, i.e.: f(0).
+view sourceprint?
+1.
+int f(const int* c, int n) {
+2.
+dp[n] = dp[n + 1] = 0;
+3.
+for (int i = n - 1; i >= 0; --i)
+4.
+dp[i] = max(c[i] + dp[i + 2], dp[i + 1]);
+5.
+return dp[0];
+6.
+}
+
+Now it is time to implement the main function, which consists in a loop that reads and solves each test case. To solve a test case, declare one array to store the row optimal values, which can be filled by reading and optimizing each row one by one. Finally, optimize the row optimal values using the same function and print the result, which will be the optimal value for the whole grid.
+view sourceprint?
+01.
+int main() {
+02.
+// zyx3d gave me the idea of using (m | n | ...) != 0 to check all zeros.
+03.
+for (int m, n; scanf("%d %d", &m, &n) == 2 && (m | n) != 0;) {
+04.
+// Read and optimize each row, storing the answers in another row.
+05.
+static int rowOptimals[MAX_N];  // Array used to store the result of each row.
+06.
+for (int i = 0; i < m; ++i) {
+07.
+// Read a row, optimize it and store the result in its optimal cell.
+08.
+static int row[MAX_N];  // Array used to store the current row.
+09.
+for (int j = 0; j < n; ++j) scanf("%d", &row[j]);
+10.
+rowOptimals[i] = f(row, n);
+11.
+}
+12.
+// At then end, optimize which rows to take using the same algorithm.
+13.
+printf("%d\n", f(rowOptimals, m));
+14.
+}
+15.
+return 0;
+16.
+}
+Conclusion
+
+In this post we presented the solution for the SPOJ CANDY problem, using a solution that reads and processes one row at a time, and then uses the same algorithm to solve the problem for the whole grid. It is important to highlight that a simple and clever solution was implemented by realizing that the behaviour of the rows in the grid was the same behaviour of the cells in the rows.
+If only one extra position is declared, the array will be accessed out of bounds when the f(i) calls f(i+2) with i=n+1.
